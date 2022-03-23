@@ -2,6 +2,9 @@ const express = require('express')
 const { spawn } = require('child_process')
 const app = express()
 const port = 4000
+app.use(express.urlencoded({extended: true}));
+app.use(express.json())
+
 
 app.get('/', (req, res) => {
   let dataToSend
@@ -22,6 +25,11 @@ app.get('/', (req, res) => {
     // send data to browser
     res.send(largeDataSet.join(''))
   })
+})
+
+app.post('/data', (req,res) => {
+ console.log(req.body)
+  res.send({message: 'data posted'})
 })
 
 app.listen(port, () => {
