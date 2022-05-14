@@ -5,28 +5,28 @@ from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 import time
 import smbus
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)       # Use BCM GPIO numbers
+# GPIO.setwarnings(False)
+# GPIO.setmode(GPIO.BCM)       # Use BCM GPIO numbers
 
-buz = 18
-GPIO.setup(buz,GPIO.OUT)
+# buz = 18
+# GPIO.setup(buz,GPIO.OUT)
 
-address = 0x48 ##address--->device address
-cmd = 0x40
-A0 = 0x40    ##A0---->port address
-A1 = 0x41
-A2 = 0x42
-A3 = 0x43
-bus = smbus.SMBus(1) 
+# address = 0x48 ##address--->device address
+# cmd = 0x40
+# A0 = 0x40    ##A0---->port address
+# A1 = 0x41
+# A2 = 0x42
+# A3 = 0x43
+# bus = smbus.SMBus(1) 
 
 def helloworld(self, params, packet):
     print('received message from AWS IOT Core')
     print('Topic:' + packet.topic)
     print('payload:'+ packet.payload)
 
-def analogRead(count):   #function,read analog data
-    read_val = bus.read_byte_data(address,cmd+count)
-    return read_val;
+# def analogRead(count):   #function,read analog data
+#     read_val = bus.read_byte_data(address,cmd+count)
+#     return read_val;
 
 myMQTTClient = AWSIoTMQTTClient("RishabClientID") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
 myMQTTClient.configureEndpoint("a1l83aslu1wtwg-ats.iot.us-east-1.amazonaws.com", 8883)
