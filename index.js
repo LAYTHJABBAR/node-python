@@ -27,9 +27,21 @@ app.get('/', (req, res) => {
   })
 })
 
-app.post('/data', (req,res) => {
- console.log(req.body)
-  res.send({message: 'data posted'})
+app.post('/switchstatus', (req,res) => {
+  try{
+     console.log("watch the value",req.body.status)
+    // let status = Number(req.body.status);
+    // console.log(status)
+    const python = spawn('python3', ['script5.py', req.body.status])
+   
+    python.stdout.on('data', function (data) {
+    console.log(JSON.parse(data))
+   })
+   res.send({message: req.body.status});
+  }catch(err){
+    res.status(500).send({status: err})
+
+  }
 })
 
 app.listen(port, () => {
