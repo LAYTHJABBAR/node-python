@@ -1,70 +1,77 @@
 from decimal import Decimal
 import RPi.GPIO as GPIO
 import time
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
-import time
 import smbus
+import json
+import AWSIoTPythonSDK.MQTTLib as AWSIoTPyMQTT
+import math
 
-# GPIO.setwarnings(False)
-# GPIO.setmode(GPIO.BCM)       # Use BCM GPIO numbers
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)       # Use BCM GPIO numbers
 
-# buz = 18
-# GPIO.setup(buz,GPIO.OUT)
+buz = 18
+GPIO.setup(buz,GPIO.OUT)
 
-# address = 0x48 ##address--->device address
-# cmd = 0x40
-# A0 = 0x40    ##A0---->port address
-# A1 = 0x41
-# A2 = 0x42
-# A3 = 0x43
-# bus = smbus.SMBus(1) 
+address = 0x48 ##address--->device address
+cmd = 0x40
+A0 = 0x40    ##A0---->port address
+A1 = 0x41
+A2 = 0x42
+A3 = 0x43
+bus = smbus.SMBus(1) 
 
-def helloworld(self, params, packet):
-    print('received message from AWS IOT Core')
-    print('Topic:' + packet.topic)
-    print('payload:'+ packet.payload)
+# Define ENDPOINT, CLIENT_ID, PATH_TO_CERTIFICATE, PATH_TO_PRIVATE_KEY, PATH_TO_AMAZON_ROOT_CA_1, MESSAGE, TOPIC, and RANGE
+ENDPOINT = "abw3iixgawgvv-ats.iot.us-west-2.amazonaws.com"
+CLIENT_ID = "testDevice"
+PATH_TO_CERTIFICATE = "/home/pi/AWSIoT/certificate.pem.crt"
+PATH_TO_PRIVATE_KEY = "/home/pi/AWSIoT/private.pem.key"
+PATH_TO_AMAZON_ROOT_CA_1 = "/home/pi/AWSIoT/root-ca.pem"
+MESSAGE = "Hello World"
+TOPIC = "test/testing"
+RANGE = 20
 
-# def analogRead(count):   #function,read analog data
-#     read_val = bus.read_byte_data(address,cmd+count)
-#     return read_val;
+myAWSIoTMQTTClient = AWSIoTPyMQTT.AWSIoTMQTTClient(CLIENT_ID)
+myAWSIoTMQTTClient.configureEndpoint(ENDPOINT, 8883)
+myAWSIoTMQTTClient.configureCredentials(PATH_TO_AMAZON_ROOT_CA_1, PATH_TO_PRIVATE_KEY, PATH_TO_CERTIFICATE)
 
-myMQTTClient = AWSIoTMQTTClient("RishabClientID") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
-myMQTTClient.configureEndpoint("a1l83aslu1wtwg-ats.iot.us-east-1.amazonaws.com", 8883)
+def analogRead(count):   #function,read analog data
+    read_val = bus.read_byte_data(address,cmd+count)
+    return read_val;
+def subscribeFunction(self, param, packet):
+    print("New message Recieved: "+packet.topic)
+    print(packet.payload)
+ 
 
-myMQTTClient.configureCredentials("/home/pi/AWSIoT/AmazonRootCA1.pem", "/home/pi/AWSIoT/private.pem.key", "/home/pi/AWSIoT/certificate.pem.crt")
-
-myMQTTClient.configureOfflinePublishQueueing(-1) # Infinite offline Publish queueing
-myMQTTClient.configureDrainingFrequency(2) # Draining: 2 Hz
-myMQTTClient.configureConnectDisconnectTimeout(10) # 10 sec
-myMQTTClient.configureMQTTOperationTimeout(5) # 5 sec
-print ('Initiating Realtime Data Transfer From Raspberry Pi...')
-myMQTTClient.connect()
-
-myMQTTClient.susbscribe("home/helloworld", 1, helloworld)
-
-while True:
-    time.sleep(5)
-
-# def loop():
-#     while True:
-#         analogVal = analogRead(0) 
-#         Vr = 5 * float(analogVal) / 255
-#         Rt = 10000 * Vr / (5 - Vr)
-#         temperature = 1 / (((math.log(Rt / 10000)) / 3950) + (1 / (273.15 + 25)))
-#         temperature = (temperature - 273.15)
-#         temperature = round(temperature, 1)
-#         fahrenheit = ((temperature*1.8)+32)
-#         time.sleep(.5)
-#         print("Sending Temperature: ", fahrenheit)
-
-
-#         myMQTTClient.publish(
-#             topic="RealTimeDataTrasfer/Temperature",
-#             QoS=1,
-#             payload='{"Temperature":"'+str(fahrenheit)+'"}')
+myAWSIoTMQTTClient.connect()
+def loop():
+    while True:
+        myAWSIoTMQTTClient.subscribe(
+         "RealTimeDataTransfer/humid",
+         1,
+         subscribeFunction)
+        analogVal = analogRead(0)
+        time.sleep(1)
+        myAWSIoTMQTTClient.publish(
+            topic="RealTimeDataTransfer/humid",
+            QoS=1,
+            payload='{"humidity":"'+str(analogVal)+'","time":"'+str(time.time())+'"}')
+        
+        # analogVal = analogRead(0) 
+        # Vr = 5 * float(analogVal) / 255
+        # Rt = 10000 * Vr / (5 - Vr)
+        # temperature = 1 / (((math.log(Rt / 10000)) / 3950) + (1 / (273.15 + 25)))
+        # temperature = (temperature - 273.15)
+        # temperature = round(temperature, 1)
+        # fahrenheit = ((temperature*1.8)+32)
+        # time.sleep(.5)
+        # print("Sending Temperature: ", fahrenheit)
 
 
-# try:
-#     loop()
-# except KeyboardInterrupt:
-#     pass
+        # myAWSIoTMQTTClient.publish(
+        #     topic="RealTimeDataTrasfer/Temperature",
+        #     QoS=1,
+        #     payload='{"Temperature":"'+str(fahrenheit)+'"}')
+try:
+    loop()
+except KeyboardInterrupt:
+    pass
