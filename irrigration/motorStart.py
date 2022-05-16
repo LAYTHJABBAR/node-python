@@ -29,7 +29,7 @@ def subscribeFunction(self, param, packet):
     print(packet.payload)
     GPIO.output(relayPin,GPIO.HIGH) #Starting relay
     print("turn on")
-    time.sleep(8)
+    time.sleep(5)
     GPIO.output(relayPin,GPIO.LOW) #Close relay
     print("turn off")
     time.sleep(1)
@@ -39,13 +39,15 @@ def subscribeFunction(self, param, packet):
 myAWSIoTMQTTClient.connect()
 def loop():
     while True:
+        time.sleep(2)
         myAWSIoTMQTTClient.subscribe(
          "RealTimeDataTransfer/startmotor",
          1,
          subscribeFunction)
-        time.sleep(15)
+        time.sleep(18)
  
 try:
+ 
     loop()
 except KeyboardInterrupt:
     pass
