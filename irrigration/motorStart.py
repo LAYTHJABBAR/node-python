@@ -29,7 +29,7 @@ def subscribeFunction(self, param, packet):
     print(packet.payload)
     GPIO.output(relayPin,GPIO.HIGH) #Starting relay
     print("turn on")
-    time.sleep(30)
+    time.sleep(8)
     GPIO.output(relayPin,GPIO.LOW) #Close relay
     print("turn off")
     time.sleep(1)
@@ -43,7 +43,7 @@ def loop():
          "RealTimeDataTransfer/startmotor",
          1,
          subscribeFunction)
-        time.sleep(50)
+        time.sleep(15)
  
 try:
     loop()
