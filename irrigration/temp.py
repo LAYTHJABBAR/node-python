@@ -50,7 +50,7 @@ def loop():
          1,
          subscribeFunction)
         analogVal = analogRead(0)
-        time.sleep(900)
+        time.sleep(3600)
         myAWSIoTMQTTClient.publish(
             topic="RealTimeDataTransfer/humid",
             QoS=1,
