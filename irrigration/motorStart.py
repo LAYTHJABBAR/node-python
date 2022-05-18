@@ -29,7 +29,7 @@ def subscribeFunction(self, param, packet):
     print(packet.payload)
     GPIO.output(relayPin,GPIO.HIGH) #Starting relay
     print("turn on")
-    time.sleep(3)
+    time.sleep(1)
     GPIO.output(relayPin,GPIO.LOW) #Close relay
     print("turn off")
     time.sleep(1)
